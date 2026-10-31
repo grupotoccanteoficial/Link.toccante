@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/contacts.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "dev": "node scripts/serve.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=22.13.0" }
 }

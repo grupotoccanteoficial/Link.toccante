@@ -1,6 +1,13 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { sectors, generalContact, getContact } from "../js/contacts.js";
+import { sectors } from "../js/contacts.js";
+import { API_BASE } from "../js/distribution-config.js";
+
+if (!process.argv.includes("--allow-unconfigured-backend")) {
+  let api;
+  try { api = new URL(API_BASE); } catch { throw new Error("Publique o backend e configure API_BASE antes de gerar a versão de produção."); }
+  if (api.protocol !== "https:" || api.username || api.password || api.search || api.hash || api.pathname !== "/") throw new Error("API_BASE deve ser a origem HTTPS real do Worker.");
+}
 
 const root = new URL("../", import.meta.url);
 const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
@@ -8,22 +15,18 @@ const whatsapp = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>`;
 
 const cards = sectors.flatMap((sector, index) => {
-  const contact = getContact(sector);
-  if (!contact) return [];
+  if (!sector.active) return [];
   const tag = sector.tag;
-  return [`<a class="service service--${escape(sector.id)}" href="${escape(contact.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escape(sector.title)}: conversar com ${escape(contact.name)} pelo WhatsApp (abre em nova aba)">
+  return [`<a class="service service--${escape(sector.id)}" href="#atendimento" data-sector="${escape(sector.id)}" aria-label="${escape(sector.title)}: conversar pelo WhatsApp">
     <span class="service-number" aria-hidden="true">0${index + 1}</span>
     <span class="service-body">
       <svg class="service-tag" viewBox="${tag.viewBox}" role="img" aria-label="Toccante ${escape(sector.title)}" focusable="false"><image href="./assets/tags/${tag.file}" width="${tag.width}" height="${tag.height}"/></svg>
       <span class="service-description">${escape(sector.description)}</span>
-      <span class="service-contact">Conversar com ${escape(contact.name)} <span aria-hidden="true">↗</span></span>
+      <span class="service-contact">Conversar pelo WhatsApp <span aria-hidden="true">↗</span></span>
     </span>
     <span class="service-action" aria-hidden="true">${whatsapp}${arrow}</span>
   </a>`];
 }).join("\n");
-
-const general = getContact(generalContact);
-const generalMarkup = general ? `<section class="general" aria-labelledby="general-title"><span class="small-rule" aria-hidden="true"></span><h2 id="general-title">Precisa de ajuda para escolher um serviço?</h2><p>Converse com nossa equipe.</p><a class="general-button" href="${escape(general.url)}" target="_blank" rel="noopener noreferrer" aria-label="Falar com ${escape(general.name)} pelo WhatsApp (abre em nova aba)">${whatsapp}<span>Falar com ${escape(general.name)}</span>${arrow}</a></section>` : "";
 
 const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -45,6 +48,7 @@ const html = `<!DOCTYPE html>
   <link rel="icon" type="image/jpeg" href="./assets/logo/grupo-toccante.jpg">
   <link rel="stylesheet" href="./css/styles.css">
   <script src="./js/app.js" defer></script>
+  <script type="module" src="./js/distribution.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#atendimento">Ir para os contatos</a>
@@ -60,9 +64,9 @@ const html = `<!DOCTYPE html>
     <section class="services" id="atendimento" aria-labelledby="services-title">
       <div class="section-heading"><p class="eyebrow">QUATRO VERTENTES. UM SÓ CUIDADO.</p><h2 id="services-title">Como podemos fazer parte<br>do seu momento?</h2><p>Selecione o setor com o qual deseja conversar</p></div>
       <div class="service-list">${cards}</div>
-      <p class="contact-note">${whatsapp}<span>Atendimento direto pelo WhatsApp</span></p>
+      <p class="contact-note" id="routing-status" role="status" aria-live="polite">${whatsapp}<span>Atendimento direto pelo WhatsApp</span></p>
+      <noscript><p class="contact-note">Ative o JavaScript para iniciar o atendimento pelo WhatsApp.</p></noscript>
     </section>
-    ${generalMarkup}
     <footer class="footer"><p>Seu momento. Nossa dedicação.</p><span>© ${new Date().getFullYear()} Grupo Toccante</span></footer>
   </main>
   <dialog class="intro" id="intro" aria-label="Vídeo de abertura do Grupo Toccante">
@@ -76,4 +80,4 @@ const html = `<!DOCTYPE html>
 await mkdir(new URL("css/", root), { recursive: true });
 await writeFile(new URL("index.html", root), html);
 await writeFile(new URL(".nojekyll", root), "");
-console.log(`Página gerada: ${fileURLToPath(new URL("index.html", root))}. ${sectors.filter(s => getContact(s)).length} setores e ${general ? 1 : 0} atendimento geral.`);
+console.log(`Página gerada: ${fileURLToPath(new URL("index.html", root))}. ${sectors.filter(s => s.active).length} vertentes em rodízio.`);

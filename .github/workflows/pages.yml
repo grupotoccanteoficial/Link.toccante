@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/build.mjs
-      - run: node --test tests/contacts.test.mjs
+      - run: node --test tests/*.test.mjs
       - uses: actions/configure-pages@v5
       - name: Preparar arquivos públicos
         run: |

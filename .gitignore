@@ -3,3 +3,6 @@ node_modules/
 Thumbs.db
 *.log
 qa/
+.wrangler/
+.dev.vars*
+.env*

@@ -1,115 +1,124 @@
 # Grupo Toccante — Atendimento
 
-Página oficial de atendimento, estática e responsiva, com abertura em vídeo e
-links diretos para WhatsApp. Não utiliza backend, login, cookies de rastreamento
-ou serviços pagos. Os cinco contatos já estão no HTML e funcionam mesmo com
-JavaScript desativado.
+Página oficial no GitHub Pages, com abertura em vídeo e quatro cartões de serviço.
+A distribuição de atendimentos é feita por um Cloudflare Worker e um D1 dedicados
+exclusivamente a este projeto. O navegador não escolhe especialistas nem controla
+a fila.
 
-## Publicação
+## Endereço e publicação
 
-Repositório: [grupotoccanteoficial/Link.toccante](https://github.com/grupotoccanteoficial/Link.toccante).
+Frontend: https://grupotoccanteoficial.github.io/Link.toccante/
 
-Endereço previsto do GitHub Pages:
-`https://grupotoccanteoficial.github.io/Link.toccante/`.
-Esse endereço só fica disponível depois de habilitar Pages e concluir o deploy.
-
-Em **Settings → Pages → Build and deployment → Source**, escolha **GitHub Actions**.
 O workflow `.github/workflows/pages.yml` gera a página, executa os testes e publica
-automaticamente cada push na `main`. O job precisa concluir com sucesso antes
-de considerar o endereço publicado.
+a `main` no GitHub Pages. A URL do backend é configurada em
+`js/distribution-config.js`. O build de produção recusa uma URL ausente ou inválida.
 
-Como alternativa, o HTML gerado também é compatível com **Deploy from a branch**,
-selecionando `main` e `/(root)`. O arquivo `.nojekyll` já está incluído. Não há
-domínio próprio configurado.
+O backend deve ser publicado e verificado antes de publicar mudanças no frontend.
+As instruções de implantação e operação estão em [backend/README.md](backend/README.md).
 
-## Alterar números, responsáveis e mensagens
+## Rodízio global
 
-Edite somente [`js/contacts.js`](js/contacts.js):
+A ordem é Israel → Raiane → Marcela → Paulo → Renato → início. Renato é elegível
+somente para Buffet. Fora de Buffet, a fila o ignora, sem reservar sua posição,
+e continua a partir do próximo especialista elegível.
 
-- `specialists`: nome, número internacional (somente dígitos) e estado ativo.
-- `sectors`: serviço, descrição, `specialistId` e mensagem.
-- `generalContact`: responsável pelo atendimento geral e mensagem.
+Uma sessão mantém sua atribuição por 30 minutos. Trocar de vertente reaproveita a
+pessoa atribuída se ela for elegível; caso contrário, faz uma nova distribuição.
+Recarregar a página não reinicia a fila. Implantar uma versão do Worker também
+não reinicia o ponteiro persistido no D1.
 
-Para trocar o responsável de um setor, altere `specialistId`. O marcador `{name}`
-na mensagem acompanha essa troca. Para ocultar um setor ou especialista, use
-`active: false`. A função `getContact()` valida o telefone e codifica a mensagem
-com `encodeURIComponent()`.
+O frontend envia apenas `sector`, `sessionId` e `requestId`. O servidor valida
+a chave idempotente, a sessão e a vertente. A atribuição, o avanço do ponteiro e a
+atualização da sessão são executados em uma transação D1, com trigger SQL.
+A janela de 30 minutos é controlada pelo servidor.
 
-Mapeamento inicial fornecido no briefing, editável e sem atribuição de cargo:
+## Manutenção
 
-| Atendimento | Contato | Telefone |
-| --- | --- | --- |
-| Cerimonial | Raiane | (31) 99918-8761 |
-| Musical | Paulo | (31) 99830-8910 |
-| Buffet | Renato | (31) 98237-9454 |
-| Decoração | Marcela | (31) 98445-9856 |
-| Geral | Israel | (31) 98303-1736 |
+- **Telefones, ordem e elegibilidade:** `backend/config.js`.
+- **Mensagens de WhatsApp:** `messages` no mesmo arquivo do backend.
+- **Descrições e tags dos cartões:** `js/contacts.js` (somente conteúdo visual).
+- **Origem HTTPS do Worker:** `js/distribution-config.js`.
+- **Cores e layout aprovados:** `css/styles.css`, preservado nesta atualização.
 
-Depois de editar, execute `node scripts/build.mjs` para atualizar o HTML e
-`node --test tests/contacts.test.mjs` para conferir a configuração. O workflow
-também faz isso automaticamente durante a publicação. Números duplicados no
-HTML são saída gerada; não devem ser alterados manualmente.
+Não remova nem reordene posições de especialistas já implantadas sem uma migração
+planejada. Para suspender uma pessoa, prefira `active: false`. Ao trocar um número
+ou uma regra no backend, publique novamente o Worker.
 
-## Desenvolvimento
+## Desenvolvimento e testes
 
-Requer Node.js 20 ou superior. Não é necessário instalar dependências.
+Requer Node.js 22.13 ou superior. A página e os testes unitários não precisam
+de instalação de dependências.
 
 ```bash
 node scripts/build.mjs
-node --test tests/contacts.test.mjs
+node --test tests/*.test.mjs
 node scripts/serve.mjs
 ```
 
-Abra `http://127.0.0.1:4175/Link.toccante/`. A prévia usa o mesmo subdiretório do
-GitHub Pages para testar os caminhos relativos. Use Ctrl+C para encerrar.
+A prévia fica em `http://127.0.0.1:4175/Link.toccante/`. Antes de configurar o
+backend, uma geração local pode usar `node scripts/build.mjs --allow-unconfigured-backend`.
+Essa opção não é usada no workflow de produção.
 
-## Identidade e arquivos originais
+Os testes cobrem ordem, salto de inelegíveis, concorrência, persistência,
+idempotência, expiração, rollback, validação, CORS, limites e dados mínimos do
+navegador. O SQL é executado em SQLite, não em uma simulação do algoritmo.
 
-As cores seguem a solicitação específica desta página:
+O teste adicional `scripts/check-router.mjs` exercita o runtime Worker/D1 real.
+Ele cria atribuições técnicas e não abre nem envia mensagens de WhatsApp:
 
-- Musical: branco com letras e detalhes dourados.
-- Cerimonial: marsala com letras e detalhes dourados.
-- Buffet: preto com letras e detalhes dourados.
-- Decoração: dourado com letras e detalhes brancos.
-
-Fundo institucional creme, títulos em EB Garamond e textos em Lato. As fontes
-são servidas pelo próprio site; licenças SIL OFL incluídas em `assets/fonts/`.
-
-O brasão, as quatro tags e o vídeo foram fornecidos pelo solicitante. Os PNGs
-originais são preservados, com transparência e cores intactas. As tags Musical,
-Cerimonial e Decoração estão na mesma imagem; janelas SVG apenas exibem a região
-de cada tag, sem redesenhar nem recolorir o arquivo.
-
-O vídeo original, em 1920×1080 e com 7,4 segundos, abre automaticamente uma vez
-por sessão, sem som. Há opções de pular, ativar som e rever. Falhas de reprodução
-ou carregamento liberam o atendimento. A preferência de redução de movimento
-desativa a abertura automática. Sem JavaScript, os contatos continuam visíveis.
-
-## Estrutura
-
-```text
-index.html                 # HTML estático gerado e pronto para Pages
-css/styles.css             # Identidade, estados de foco e responsividade
-js/contacts.js             # Configuração central dos contatos
-js/app.js                  # Abertura em vídeo
-assets/logo/               # Brasão original
-assets/tags/               # PNGs originais das tags
-assets/video/              # Motion original
-assets/fonts/              # Fontes e licenças
-scripts/build.mjs          # Gera HTML a partir da configuração
-scripts/serve.mjs          # Prévia local
-tests/contacts.test.mjs     # Destinos, mensagens, inativos e assets
-.github/workflows/pages.yml
-.nojekyll
+```bash
+node scripts/check-router.mjs http://127.0.0.1:8787
 ```
 
-## Verificações
+Para apontá-lo a um backend publicado, é necessário acrescentar explicitamente
+`--allow-live-assignment`. Esses testes consomem posições da fila e não devem
+ser executados rotineiramente na produção.
 
-Os testes conferem os cinco números, as mensagens decodificadas, a troca de
-responsável, os estados inativos, os links pré-renderizados e a existência dos
-assets. Os testes não enviam mensagens aos contatos.
+## Interface preservada
 
-Prévia validada em desktop e viewport mobile de 390 px, sem transbordamento
-horizontal. Vídeo carregado em 1920×1080, encerramento automático conferido.
-A disponibilidade pública depende do resultado do GitHub Pages e deve ser
-confirmada após cada publicação.
+Logo, tags originais, fontes EB Garamond e Lato, cores, bordas, espaçamentos,
+responsividade e abertura em vídeo foram mantidos. Os quatro cartões exibem
+“Conversar pelo WhatsApp”, sem nomes. A seção antiga de atendimento geral foi
+removida por solicitação do usuário.
+
+O vídeo continua abrindo uma vez por sessão, com opções de pular, ativar som e
+rever. A preferência de redução de movimento desativa a abertura automática.
+
+O rodízio requer JavaScript e conexão com o backend. Se o serviço falhar, a página
+informa o erro e permite tentar novamente com a mesma chave. Não há fallback
+para número fixo ou escolha aleatória. A navegação ao WhatsApp usa a mesma aba,
+evitando bloqueadores de pop-up em celulares.
+
+## Proteções e dados
+
+O Worker aceita apenas a origem do frontend, valida a vertente e os UUIDs,
+limita corpos a 1 KB e aplica limites por sessão e IP (HMAC, sem armazenar IP bruto).
+CORS e limites básicos reduzem abuso; não constituem uma prova de identidade
+humana. Os identificadores técnicos da sessão ficam no sessionStorage, sem
+armazenar especialista ou ponteiro no navegador.
+
+Os limites são 30 pedidos por sessão/minuto e 120 por IP/minuto. Respostas de
+erro não devolvem números alternativos. O banco tem limpeza periódica em lotes,
+preservando sempre o ponteiro global.
+
+## Arquivos principais
+
+```text
+index.html                         # HTML gerado
+css/styles.css                     # Visual aprovado, preservado
+js/app.js                          # Abertura em vídeo, preservada
+js/contacts.js                     # Metadados visuais das vertentes
+js/distribution-config.js          # URL pública do Worker
+js/distribution-client.js          # Identificadores e chamada à API
+js/distribution.js                 # Cliques, estado acessível e navegação
+backend/config.js                  # Contatos, mensagens e elegibilidade
+backend/distributor.js             # Transação de distribuição
+backend/worker.js                  # API HTTPS, validação e limites
+backend/migrations/                # Histórico SQL imutável
+backend/wrangler.jsonc             # Worker e banco exclusivo
+assets/                            # Materiais originais preservados
+scripts/                           # Build, prévia e teste de integração
+tests/                             # Testes automatizados
+```
+
+As licenças das fontes SIL OFL permanecem em `assets/fonts/`.
