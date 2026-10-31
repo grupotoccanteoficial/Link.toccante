@@ -7,6 +7,11 @@ Conta selecionada pelo solicitante: `35dd3011d50b6df5ead02fc66152e587`.
 Antes de implantar, confira a conta e as permissões com `wrangler whoami`.
 Nenhum plano pago, domínio próprio ou API paga de WhatsApp é necessário.
 
+API: `https://toccante-atendimento-router.grupotoccante-atendimento.workers.dev`.
+Banco exclusivo: `0cc43f79-a697-4f82-9f6d-3b84f96daa1f`.
+O endereço `grupotoccante-atendimento.workers.dev` foi aprovado pelo solicitante
+e registrado nessa conta. O frontend permanece no GitHub Pages.
+
 ## Implantação inicial
 
 Os exemplos usam Wrangler 4.92.0. Pode-se usar uma instalação já disponível ou

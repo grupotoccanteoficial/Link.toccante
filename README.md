@@ -16,6 +16,9 @@ a `main` no GitHub Pages. A URL do backend é configurada em
 O backend deve ser publicado e verificado antes de publicar mudanças no frontend.
 As instruções de implantação e operação estão em [backend/README.md](backend/README.md).
 
+Após o deploy, `node scripts/verify-public.mjs` confere os arquivos, os quatro
+cartões, a API, CORS e o vídeo sem criar atribuições nem avançar a fila real.
+
 ## Rodízio global
 
 A ordem é Israel → Raiane → Marcela → Paulo → Renato → início. Renato é elegível

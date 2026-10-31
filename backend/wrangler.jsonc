@@ -11,6 +11,7 @@
     {
       "binding": "DB",
       "database_name": "toccante-atendimento-rodizio",
+      "database_id": "0cc43f79-a697-4f82-9f6d-3b84f96daa1f",
       "migrations_dir": "migrations"
     }
   ]
