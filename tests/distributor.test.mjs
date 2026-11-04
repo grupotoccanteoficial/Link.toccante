@@ -86,7 +86,7 @@ test("100 sessões simultâneas recebem sequências únicas e consecutivas", asy
   let position = 0;
   const rows = db.rows("allocations").sort((a, b) => a.sequence - b.sequence);
   for (const [index, row] of rows.entries()) {
-    if (position === 4 && row.initial_sector !== "buffet") position = 0;
+    if (position === 4) position = 0;
     assert.equal(row.sequence, index + 1);
     assert.equal(row.specialist_position, position);
     position = (position + 1) % 5;
