@@ -2,7 +2,6 @@ const intro = document.querySelector("#intro");
 const video = document.querySelector("#opening-video");
 const replay = document.querySelector("#replay");
 const skip = document.querySelector("#skip-intro");
-const sound = document.querySelector("#toggle-sound");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let safetyTimer;
 let startedByUser = false;
@@ -20,8 +19,6 @@ async function playIntro(manual = false) {
   if (typeof intro.showModal !== "function") return;
   startedByUser = manual;
   video.muted = true;
-  sound.textContent = "Ativar som";
-  sound.setAttribute("aria-pressed", "false");
   video.currentTime = 0;
   intro.showModal();
   skip.focus();
@@ -35,11 +32,6 @@ video.addEventListener("ended", finishIntro);
 video.addEventListener("error", finishIntro);
 intro.addEventListener("cancel", (event) => { event.preventDefault(); finishIntro(); });
 intro.addEventListener("close", () => { clearTimeout(safetyTimer); video.pause(); });
-sound.addEventListener("click", () => {
-  video.muted = !video.muted;
-  sound.textContent = video.muted ? "Ativar som" : "Silenciar";
-  sound.setAttribute("aria-pressed", String(!video.muted));
-});
 replay.addEventListener("click", () => playIntro(true));
 replay.hidden = false;
 let seen = false;

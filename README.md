@@ -41,7 +41,7 @@ A janela de 30 minutos é controlada pelo servidor.
 - **Mensagens de WhatsApp:** `messages` no mesmo arquivo do backend.
 - **Descrições e tags dos cartões:** `js/contacts.js` (somente conteúdo visual).
 - **Origem HTTPS do Worker:** `js/distribution-config.js`.
-- **Cores e layout aprovados:** `css/styles.css`, preservado nesta atualização.
+- **Cores e layout:** `css/styles.css`.
 
 Não remova nem reordene posições de especialistas já implantadas sem uma migração
 planejada. Para suspender uma pessoa, prefira `active: false`. Ao trocar um número
@@ -77,15 +77,17 @@ Para apontá-lo a um backend publicado, é necessário acrescentar explicitament
 `--allow-live-assignment`. Esses testes consomem posições da fila e não devem
 ser executados rotineiramente na produção.
 
-## Interface preservada
+## Interface
 
-Logo, tags originais, fontes EB Garamond e Lato, cores, bordas, espaçamentos,
-responsividade e abertura em vídeo foram mantidos. Os quatro cartões exibem
+Logo, tags originais e fontes EB Garamond e Lato são reutilizados. A tag Musical
+recebe tratamento dourado sobre o cartão branco, sem alterar seu desenho. Os
+recortes dos sprites impedem que apareçam fragmentos das tags vizinhas. Os quatro cartões exibem
 “Conversar pelo WhatsApp”, sem nomes. A seção antiga de atendimento geral foi
 removida por solicitação do usuário.
 
-O vídeo continua abrindo uma vez por sessão, com opções de pular, ativar som e
-rever. A preferência de redução de movimento desativa a abertura automática.
+O vídeo abre uma vez por sessão, sem som, com opções de pular e rever. Ele preenche
+a tela com `object-fit: cover`, preservando a proporção e recortando as laterais
+em telas verticais. A preferência de redução de movimento desativa a abertura automática.
 
 O rodízio requer JavaScript e conexão com o backend. Se o serviço falhar, a página
 informa o erro e permite tentar novamente com a mesma chave. Não há fallback
@@ -108,8 +110,8 @@ preservando sempre o ponteiro global.
 
 ```text
 index.html                         # HTML gerado
-css/styles.css                     # Visual aprovado, preservado
-js/app.js                          # Abertura em vídeo, preservada
+css/styles.css                     # Visual e layout responsivo
+js/app.js                          # Abertura em vídeo sem som
 js/contacts.js                     # Metadados visuais das vertentes
 js/distribution-config.js          # URL pública do Worker
 js/distribution-client.js          # Identificadores e chamada à API

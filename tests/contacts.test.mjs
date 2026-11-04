@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile, access } from "node:fs/promises";
-import { createHash } from "node:crypto";
 import { sectors } from "../js/contacts.js";
 import { specialists, eligiblePositions, whatsappUrl, messages } from "../backend/config.js";
 
@@ -30,12 +29,4 @@ test("HTML mantém quatro cartões, sem nomes, telefones ou seção de atendimen
   for (const file of files) await access(new URL(`../${file}`, import.meta.url));
   const css = await readFile(new URL("../css/styles.css", import.meta.url), "utf8");
   for (const [, font] of css.matchAll(/url\("\.\.\/([^\"]+)"\)/g)) await access(new URL(`../${font}`, import.meta.url));
-});
-
-test("CSS do design aprovado permanece byte a byte intacto", async () => {
-  const css = await readFile(new URL("../css/styles.css", import.meta.url));
-  // O Git pode normalizar CRLF no checkout do Windows.
-  const normalized = css.toString("utf8").replaceAll("\r\n", "\n");
-  const original = "8a686cad161f906437a39eb013c82a5337b53d02c1acc48623a83cf6fda6044e";
-  assert.equal(createHash("sha256").update(normalized).digest("hex"), original);
 });

@@ -17,10 +17,14 @@ const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const cards = sectors.flatMap((sector, index) => {
   if (!sector.active) return [];
   const tag = sector.tag;
+  const [x, y, width, height] = tag.viewBox.split(" ").map(Number);
+  // O recorte explícito impede que o sprite vizinho apareça nas margens do SVG.
+  // O filtro mantém a geometria e o relevo da arte original, em dourado sobre branco.
+  const tagArt = `<defs><clipPath id="tag-crop-${sector.id}"><rect x="${x}" y="${y}" width="${width}" height="${height}"/></clipPath>${sector.id === "musical" ? `<filter id="musical-gold" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="0.48" intercept="0.24"/><feFuncG type="linear" slope="0.40" intercept="0.16"/><feFuncB type="linear" slope="0.22" intercept="0.05"/></feComponentTransfer></filter>` : ""}</defs><g clip-path="url(#tag-crop-${sector.id})"><image href="./assets/tags/${tag.file}" width="${tag.width}" height="${tag.height}"${sector.id === "musical" ? ' filter="url(#musical-gold)"' : ""}/></g>`;
   return [`<a class="service service--${escape(sector.id)}" href="#atendimento" data-sector="${escape(sector.id)}" aria-label="${escape(sector.title)}: conversar pelo WhatsApp">
     <span class="service-number" aria-hidden="true">0${index + 1}</span>
     <span class="service-body">
-      <svg class="service-tag" viewBox="${tag.viewBox}" role="img" aria-label="Toccante ${escape(sector.title)}" focusable="false"><image href="./assets/tags/${tag.file}" width="${tag.width}" height="${tag.height}"/></svg>
+      <svg class="service-tag" viewBox="${tag.viewBox}" role="img" aria-label="Toccante ${escape(sector.title)}" focusable="false">${tagArt}</svg>
       <span class="service-description">${escape(sector.description)}</span>
       <span class="service-contact">Conversar pelo WhatsApp <span aria-hidden="true">↗</span></span>
     </span>
@@ -32,7 +36,7 @@ const html = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f1e6">
   <title>Grupo Toccante | Cerimonial, Musical, Buffet e Decoração</title>
   <meta name="description" content="Conheça os serviços do Grupo Toccante e fale diretamente com nossos especialistas em Cerimonial, Musical, Buffet e Decoração.">
@@ -72,7 +76,7 @@ const html = `<!DOCTYPE html>
   <dialog class="intro" id="intro" aria-label="Vídeo de abertura do Grupo Toccante">
     <video id="opening-video" muted playsinline preload="none" aria-label="Apresentação do Grupo Toccante"><source src="./assets/video/toccante-abertura-1920x1080.mp4" type="video/mp4"></video>
     <div class="intro-top"><span>GRUPO TOCCANTE</span><button id="skip-intro" type="button">Ir para atendimento <span aria-hidden="true">↗</span></button></div>
-    <div class="intro-bottom"><button id="toggle-sound" type="button" aria-pressed="false">Ativar som</button><span>Momentos que ficam.</span></div>
+    <div class="intro-bottom"><span>Momentos que ficam.</span></div>
   </dialog>
 </body>
 </html>
