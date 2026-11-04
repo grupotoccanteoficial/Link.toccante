@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "toccante-atendimento-router",
-  "account_id": "35dd3011d50b6df5ead02fc66152e587",
+  "account_id": "a8cafaa7d889f6a8196f9cbb1f09d0c9",
   "main": "worker.js",
   "compatibility_date": "2026-05-22",
   "workers_dev": true,
@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "toccante-atendimento-rodizio",
-      "database_id": "0cc43f79-a697-4f82-9f6d-3b84f96daa1f",
+      "database_id": "9a0f936f-086f-41bf-96cd-f287f4ed6cb4",
       "migrations_dir": "migrations"
     }
   ]

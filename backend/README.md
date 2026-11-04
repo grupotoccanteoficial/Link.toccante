@@ -3,13 +3,13 @@
 Cloudflare Worker `toccante-atendimento-router`, com um D1 novo e exclusivo
 `toccante-atendimento-rodizio`. Não vincule banco de outro projeto.
 
-Conta selecionada pelo solicitante: `35dd3011d50b6df5ead02fc66152e587`.
+Conta selecionada pelo solicitante: `a8cafaa7d889f6a8196f9cbb1f09d0c9`.
 Antes de implantar, confira a conta e as permissões com `wrangler whoami`.
 Nenhum plano pago, domínio próprio ou API paga de WhatsApp é necessário.
 
-API: `https://toccante-atendimento-router.grupotoccante-atendimento.workers.dev`.
-Banco exclusivo: `0cc43f79-a697-4f82-9f6d-3b84f96daa1f`.
-O endereço `grupotoccante-atendimento.workers.dev` foi aprovado pelo solicitante
+API: `https://toccante-atendimento-router.layonlad.workers.dev`.
+Banco exclusivo: `9a0f936f-086f-41bf-96cd-f287f4ed6cb4`.
+O endereço `layonlad.workers.dev` foi aprovado pelo solicitante
 e registrado nessa conta. O frontend permanece no GitHub Pages.
 
 ## Implantação inicial
@@ -100,3 +100,11 @@ de pedidos, expiração e rollback. O teste com runtime Worker/D1 local confirmo
 20 repetições sem duplicar posição, 30 atribuições simultâneas distribuídas em
 seis para cada especialista na configuração histórica de cinco contatos.
 A configuração atual usa somente quatro contatos ativos, em todas as vertentes.
+
+## Publicação de 04/11/2026
+
+Serviço migrado para a conta autorizada pelo solicitante, com banco D1 exclusivo novo.
+O Worker foi publicado pelo editor do painel, com os módulos de `backend/` reunidos em um arquivo.
+`RATE_LIMIT_SECRET` está criptografado no Worker. Cron: `17 * * * *`.
+Verificação real: Cerimonial → Israel, Musical → Raiane, Buffet → Marcela,
+Decoração → Paulo, Buffet → Israel. Nenhuma mensagem foi enviada ao WhatsApp.
