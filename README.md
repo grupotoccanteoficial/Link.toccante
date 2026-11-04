@@ -21,9 +21,9 @@ cartões, a API, CORS e o vídeo sem criar atribuições nem avançar a fila rea
 
 ## Rodízio global
 
-A ordem é Israel → Raiane → Marcela → Paulo → Renato → início. Renato é elegível
-somente para Buffet. Fora de Buffet, a fila o ignora, sem reservar sua posição,
-e continua a partir do próximo especialista elegível.
+A ordem é Israel → Raiane → Marcela → Paulo → início, compartilhada entre
+Cerimonial, Musical, Buffet e Decoração. Todos os quatro atendem todas as vertentes.
+A posição histórica do contato removido está desativada e não contém telefone.
 
 Uma sessão mantém sua atribuição por 30 minutos. Trocar de vertente reaproveita a
 pessoa atribuída se ela for elegível; caso contrário, faz uma nova distribuição.

@@ -5,7 +5,8 @@ export const specialists = [
   { id: "raiane", name: "Raiane", whatsapp: "5531999188761", sectors: ["cerimonial", "musical", "buffet", "decoracao"], active: true },
   { id: "marcela", name: "Marcela", whatsapp: "5531984459856", sectors: ["cerimonial", "musical", "buffet", "decoracao"], active: true },
   { id: "paulo", name: "Paulo", whatsapp: "5531998308910", sectors: ["cerimonial", "musical", "buffet", "decoracao"], active: true },
-  { id: "renato", name: "Renato", whatsapp: "5531982379454", sectors: ["buffet"], active: true },
+  // Posição histórica preservada para compatibilidade com o ponteiro e as sessões no D1.
+  { id: "retired-4", sectors: [], active: false },
 ];
 
 export const messages = Object.freeze({

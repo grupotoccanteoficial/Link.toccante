@@ -98,4 +98,5 @@ limites gratuitos de Workers/D1 no painel antes de ampliar o volume.
 Os testes automatizados incluem 100 sessões concorrentes, repetição concorrente
 de pedidos, expiração e rollback. O teste com runtime Worker/D1 local confirmou
 20 repetições sem duplicar posição, 30 atribuições simultâneas distribuídas em
-seis para cada especialista, e a exclusão do Renato fora de Buffet.
+seis para cada especialista na configuração histórica de cinco contatos.
+A configuração atual usa somente quatro contatos ativos, em todas as vertentes.

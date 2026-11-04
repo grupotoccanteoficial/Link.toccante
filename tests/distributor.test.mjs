@@ -10,11 +10,11 @@ import { TestD1 } from "./d1-test-adapter.mjs";
 const input = (sector = "buffet", sessionId = crypto.randomUUID(), requestId = crypto.randomUUID()) => ({ sector, sessionId, requestId });
 const setup = context => { const db = new TestD1(); context.after(() => db.close()); return db; };
 
-test("Buffet percorre os cinco especialistas e reinicia na ordem fornecida", async context => {
+test("Buffet percorre os quatro especialistas e reinicia na ordem fornecida", async context => {
   const db = setup(context);
   const people = [];
   for (let i = 0; i < 7; i++) people.push(specialists[(await assign(db, input())).specialist_position].id);
-  assert.deepEqual(people, ["israel", "raiane", "marcela", "paulo", "renato", "israel", "raiane"]);
+  assert.deepEqual(people, ["israel", "raiane", "marcela", "paulo", "israel", "raiane", "marcela"]);
 });
 
 test("a fila é única entre vertentes e reproduz o exemplo misto", async context => {
@@ -26,12 +26,12 @@ test("a fila é única entre vertentes e reproduz o exemplo misto", async contex
   assert.deepEqual(people, ["israel", "raiane", "marcela", "paulo", "israel", "raiane", "marcela"]);
 });
 
-test("Renato é ignorado fora de Buffet e sua posição não fica reservada", async context => {
+test("a posição desativada é ignorada em todas as vertentes", async context => {
   const db = setup(context);
   for (let i = 0; i < 4; i++) await assign(db, input());
   assert.equal((await assign(db, input("musical"))).specialist_position, 0);
   assert.equal((await assign(db, input("buffet"))).specialist_position, 1);
-  for (let i = 0; i < 40; i++) assert.notEqual((await assign(db, input(["cerimonial", "musical", "decoracao"][i % 3]))).specialist_position, 4);
+  for (let i = 0; i < 40; i++) assert.notEqual((await assign(db, input(["cerimonial", "musical", "buffet", "decoracao"][i % 4]))).specialist_position, 4);
 });
 
 test("sessão reaproveita o mesmo especialista por 30 minutos, inclusive entre setores", async context => {
@@ -50,15 +50,14 @@ test("sessão reaproveita o mesmo especialista por 30 minutos, inclusive entre s
   assert.notEqual(next.id, first.id);
 });
 
-test("sessão atribuída ao Renato recebe novo elegível ao mudar de Buffet", async context => {
+test("sessão histórica da posição removida recebe um contato ativo", async context => {
   const db = setup(context);
-  for (let i = 0; i < 4; i++) await assign(db, input());
   const session = crypto.randomUUID();
-  assert.equal((await assign(db, input("buffet", session))).specialist_position, 4);
-  const musical = await assign(db, input("musical", session));
-  assert.equal(musical.specialist_position, 0);
-  assert.equal((await assign(db, input("buffet", session))).id, musical.id);
-  assert.equal(db.state().total_allocations, 6);
+  const first = await assign(db, input("buffet", session));
+  db.sqlite.exec(`UPDATE visitor_sessions SET specialist_position = 4 WHERE session_id = \'${session}\'`);
+  const next = await assign(db, input("buffet", session));
+  assert.equal(next.specialist_position, 1);
+  assert.notEqual(next.id, first.id);
 });
 
 test("repetições concorrentes da mesma chave consomem somente uma posição", async context => {

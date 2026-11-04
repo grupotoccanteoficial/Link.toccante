@@ -6,12 +6,12 @@ import { sectors } from "../js/contacts.js";
 import { specialists, eligiblePositions, whatsappUrl, messages } from "../backend/config.js";
 
 test("ordem, números e elegibilidade permanecem centralizados no backend", () => {
-  assert.deepEqual(specialists.map(p => [p.id, p.whatsapp]), [
+  assert.deepEqual(specialists.filter(p => p.active).map(p => [p.id, p.whatsapp]), [
     ["israel", "5531983031736"], ["raiane", "5531999188761"], ["marcela", "5531984459856"],
-    ["paulo", "5531998308910"], ["renato", "5531982379454"],
+    ["paulo", "5531998308910"],
   ]);
   for (const sector of sectors) {
-    assert.deepEqual(eligiblePositions(sector.id), sector.id === "buffet" ? [0, 1, 2, 3, 4] : [0, 1, 2, 3]);
+    assert.deepEqual(eligiblePositions(sector.id), [0, 1, 2, 3]);
     for (const position of eligiblePositions(sector.id)) {
       const url = new URL(whatsappUrl(position, sector.id));
       assert.equal(url.origin, "https://wa.me");
